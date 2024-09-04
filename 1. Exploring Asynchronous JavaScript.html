@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvel Characters</title>
+    <style>
+        .character {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            display: inline-block;
+            text-align: center;
+        }
+        img {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Marvel Characters</h1>
+    <div id="charactersContainer"></div>
+
+    <!-- Include the crypto-js library for MD5 hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script>
+        // Task 2: Fetching Characters Using Fetch API
+
+        const publicKey = 'e481bb9e6a2b0a324b5350eb80cd9161';
+        const privateKey = '0cda07551641499cf2611b0998df4a742c8c57b7';
+        const ts = new Date().getTime();
+        const hash = CryptoJS.MD5(ts + privateKey + publicKey).toString();
+
+        async function fetchCharacters() {
+            const url = `https://gateway.marvel.com/v1/public/characters?ts=${ts}&apikey=${publicKey}&hash=${hash}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                console.log(data.data.results); // Log characters to console
+                return data.data.results;
+            } catch (error) {
+                console.error('Fetching characters failed:', error);
+            }
+        }
+
+        // Task 3: Updating User Interface Dynamically
+
+        function updateUI(characters) {
+            const container = document.getElementById('charactersContainer');
+            container.innerHTML = ''; // Clear existing content
+
+            characters.forEach(character => {
+                const characterElement = document.createElement('div');
+                characterElement.className = 'character';
+
+                const nameElement = document.createElement('h2');
+                nameElement.textContent = character.name;
+
+                const imgElement = document.createElement('img');
+                imgElement.src = `${character.thumbnail.path}.${character.thumbnail.extension}`;
+                imgElement.alt = character.name;
+
+                characterElement.appendChild(nameElement);
+                characterElement.appendChild(imgElement);
+                container.appendChild(characterElement);
+            });
+        }
+
+        fetchCharacters().then(updateUI);
+    </script>
+</body>
+</html>
